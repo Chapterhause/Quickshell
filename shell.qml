@@ -22,6 +22,7 @@ PanelWindow {
 	property string blue: "#458588"
 	property string yellow: "#D79921"
 	property string green: "#98971A"
+	property string wallpaper: "paintForest"	
 
   RowLayout {
     anchors.fill: parent
@@ -44,7 +45,7 @@ PanelWindow {
         }
       }
     }	
-
+	
 		Item { width: 40}		
 
 		ColumnLayout {
@@ -55,6 +56,56 @@ PanelWindow {
 			}
 
 			Audio { }
+		}
+
+		Menu {
+			id: wallpaperMenu	
+			title: Wallpapers	
+			height: 50
+			width: 100
+			x: 1000
+			MenuItem { 		
+				Button {	
+					text: "paintForest"
+					onClicked: { wallpaper = "paintForest"; wallpaperChange.running = true	}	
+				}								
+			}
+			MenuItem {
+				Button {	
+					text: "cherryBlossom"
+					onClicked: { wallpaper = "cherryBlossom"; wallpaperChange.running = true	}	
+				}		
+			}
+			MenuItem { 		
+				Button {	
+					text: "corona"
+					onClicked: { wallpaper = "corona"; wallpaperChange.running = true	}	
+				}								
+			}
+			MenuItem { 		
+				Button {	
+					text: "studio"
+					onClicked: { wallpaper = "studio"; wallpaperChange.running = true	}	
+				}								
+			}
+		}	
+		
+
+		Process {
+				id: wallpaperChange		
+				command: [ "sh", "-c", "swww img ~/wallpaper/gruvbox/" + wallpaper + ".png"]
+				running: false
+			}
+
+		Button {
+			text: "Wallpapers"
+			font { bold: true }
+			onClicked: wallpaperMenu.open() 
+			background: Rectangle {
+				color: green
+				radius: 10
+				width: 85
+			}
 		}
 
 		Text {
