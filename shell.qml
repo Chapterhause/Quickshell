@@ -6,29 +6,30 @@ import QtQuick.Layouts
 import Quickshell.Io
 import QtQuick.Controls
 
-PanelWindow {
-  anchors.top: true
-  anchors.left: true
-  anchors.right: true
-  implicitHeight: 40
-  color: black
+ShellRoot {
 
-	property int batLevel
-	property int volume
-	
 	property string black: "#282828" 	
 	property string grey: "#7C6F64"	
 	property string white: "#EBDBB2"
 	property string blue: "#458588"
 	property string yellow: "#D79921"
 	property string green: "#98971A"
-	property string wallpaper: "paintForest"	
+	property string wallpaper: "Tranquility"
+
+PanelWindow {
+  anchors.top: true
+  anchors.left: true
+  anchors.right: true
+  implicitHeight: 40
+  color: black	
 
   RowLayout {
     anchors.fill: parent
 		anchors.margins: 8
-		spacing: 20
+		spacing: 30
 
+    RowLayout {
+     spacing: 25
     Repeater {
       model: 9
 
@@ -45,55 +46,46 @@ PanelWindow {
         }
       }
     }	
+    }
 	
 		Item { width: 40}		
-
-		ColumnLayout {
-			spacing: 15
-			anchors.margins: 3
-			Brightness { 
-				Layout.preferredHeight: 3
-			}
-
-			Audio { }
-		}
+		Audio { }
 
 		Menu {
 			id: wallpaperMenu	
 			title: Wallpapers	
 			height: 50
 			width: 100
-			x: 1000
+			x: 2000
 			MenuItem { 		
 				Button {	
-					text: "paintForest"
-					onClicked: { wallpaper = "paintForest"; wallpaperChange.running = true	}	
+					text: "Tranquility"
+					onClicked: { wallpaper = "tranquility"; wallpaperChange.running = true	}	
 				}								
 			}
 			MenuItem {
 				Button {	
-					text: "cherryBlossom"
-					onClicked: { wallpaper = "cherryBlossom"; wallpaperChange.running = true	}	
+					text: "redGrove"
+					onClicked: { wallpaper = "redGrove"; wallpaperChange.running = true	}	
 				}		
 			}
 			MenuItem { 		
 				Button {	
-					text: "corona"
-					onClicked: { wallpaper = "corona"; wallpaperChange.running = true	}	
+					text: "sunflowerPixel"
+					onClicked: { wallpaper = "sunflowerPixel"; wallpaperChange.running = true	}	
 				}								
 			}
 			MenuItem { 		
 				Button {	
-					text: "studio"
-					onClicked: { wallpaper = "studio"; wallpaperChange.running = true	}	
+					text: "rainbowBridge"
+					onClicked: { wallpaper = "rainbowBridge"; wallpaperChange.running = true	}	
 				}								
 			}
 		}	
-		
-
+	
 		Process {
 				id: wallpaperChange		
-				command: [ "sh", "-c", "swww img ~/wallpaper/gruvbox/" + wallpaper + ".png"]
+				command: [ "sh", "-c", "swww img --transition-type none ~/wallpaper/" + wallpaper + ".png"]
 				running: false
 			}
 
@@ -106,29 +98,6 @@ PanelWindow {
 				radius: 10
 				width: 85
 			}
-		}
-
-		Text {
-			id: battery
-			color: green
-			font { pixelSize: 15; bold: true }	
-			text: "󰁹 " + batLevel + "%"
-		}		
-
-		Process {
-				id: bat
-				command: ["sh", "-c", "upower -i /org/freedesktop/UPower/devices/battery_BATT | grep percentage | grep -o '[0-9]*'"]
-				running: true
-				stdout: StdioCollector {
-    			onStreamFinished: batLevel = this.text
-    		}
-			}
-	
-		Timer {
-			interval: 5000
-			running: true
-			repeat: true
-			onTriggered: bat.running = true
 		}
 
 		Text {
@@ -145,4 +114,27 @@ PanelWindow {
 			onTriggered: clock.text = Qt.formatDateTime(new Date(), "HH:mm:ss") 
 		}
 	}
+}
+
+PanelWindow {
+	id: sidePanel	
+	anchors.right: true
+	implicitHeight: 120
+	implicitWidth: 0
+
+	MouseArea {
+		anchors.fill: parent
+		onClicked: {
+			animateWidth.start()
+		}
+	}
+
+	PropertyAnimation {
+		id: animateWidth
+		target: sidePanel
+		properties: "implicitWidth"
+		to: "40"
+		duration: 200
+	}
+}
 }
