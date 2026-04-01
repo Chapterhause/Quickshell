@@ -117,53 +117,53 @@ PanelWindow {
 						}
 					}
 
-		Text {
-			id: ram
-			color: blue
-			text: "󰧑 " + ramUsage + "%"
-			font { pixelSize: 15; bold: true}
-		}
+//		Text {
+//			id: ram
+//			color: blue
+//			text: "󰧑 " + ramUsage + "%"
+//			font { pixelSize: 15; bold: true}
+//		}
+//
+//		Process {
+//			id: getRam
+//			command: ["sh", "-c", "free | grep -o '[0-9]*' | sed -n -e 2p"]
+//			stdout: StdioCollector {
+//				onStreamFinished: ramUsage = this.text / 15755544 * 100
+//			}
+//			running: true
+//		}
+//
+//		Timer {
+//			interval: 5000
+//			running: true
+//			repeat: true
+//			onTriggered: getRam.running = true
+//		}
 
-		Process {
-			id: getRam
-			command: ["sh", "-c", "free | grep -o '[0-9]*' | sed -n -e 2p"]
-			stdout: StdioCollector {
-				onStreamFinished: ramUsage = this.text / 15755544 * 100
-			}
-			running: true
-		}
 
-		Timer {
-			interval: 5000
-			running: true
-			repeat: true
-			onTriggered: getRam.running = true
-		}
-
-
-		Text {
-			id: cpu
-			color: yellow
-			text: "󰘚 " + cpuUsage + "%"
-			font { pixelSize: 15; bold: true}
-		}
-
-		Process {
-			id: getCpu
-			command: ["sh", "-c", "vmstat | grep -o '[0-9]*' | sed -n -e '15p; 16q'"]
-			stdout: StdioCollector {
-				onStreamFinished: cpuUsage = 100 - this.text
-			}
-			running: true
-		}
-
-		Timer {
-			interval: 5000
-			running: true
-			repeat: true
-			onTriggered: getCpu.running = true
-		}
-
+//		Text {
+//			id: cpu
+//			color: yellow
+//			text: "󰘚 " + cpuUsage + "%"
+//			font { pixelSize: 15; bold: true}
+//		}
+//
+//		Process {
+//			id: getCpu
+//			command: ["sh", "-c", "vmstat | grep -o '[0-9]*' | sed -n -e '15p; 16q'"]
+//			stdout: StdioCollector {
+//				onStreamFinished: cpuUsage = 100 - this.text
+//			}
+//			running: true
+//		}
+//
+//		Timer {
+//			interval: 5000
+//			running: true
+//			repeat: true
+//			onTriggered: getCpu.running = true
+//		}
+//
 		Text {
 			id: battery
 			color: green
