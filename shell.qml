@@ -6,6 +6,18 @@ import QtQuick.Layouts
 import Quickshell.Io
 import QtQuick.Controls
 
+ShellRoot {
+
+  property string black: "#282828" 	
+  property string darkGrey: "#3C3836"
+  property string grey: "#7C6F64"	
+  property string white: "#EBDBB2"
+  property string blue: "#458588"
+  property string yellow: "#D79921"
+  property string green: "#98971A"
+	
+  property string wallpaper: "Tranquility"	 
+	
 PanelWindow {
 	id: bar
 	anchors.top: true
