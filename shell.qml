@@ -24,7 +24,7 @@ PanelWindow {
   anchors.right: true
   implicitHeight: 40
   color: black	
-  id: topBar
+	id: topBar	
 
   RowLayout {	
 		anchors.fill: parent
@@ -33,7 +33,7 @@ PanelWindow {
     spacing: 30
 
     RowLayout {
-      spacing: 25
+      spacing: 15
       Repeater {
         model: 9
 
@@ -76,7 +76,10 @@ PanelWindow {
 				hoverEnabled: true
 				onExited: {
 	  			subwindow.visible = false
-  			}
+				}
+				Keys.onDeletePressed: {
+					subwindow.visible = false
+				}
   			TabBar {
        		id: bar
         	width: parent.width
@@ -98,7 +101,7 @@ PanelWindow {
     			currentIndex: bar.currentIndex
 					Text {
 						text: "Current Song:"	
-						color: white
+						color: white	
 					}	
     			Text {
 						text: "CPU Usage:"	
@@ -125,17 +128,68 @@ PanelWindow {
 //      }
 //    }
 
-    Audio { }
+    Audio { }  
 
-    WallpaperMenu { }  
+		ScrollView {	
+			implicitWidth: 120	
+			ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+//			ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+			RowLayout {		
+				spacing: 5
+				Repeater {
+					model: [ 
+						"redGrove", 
+						"tranquility", 
+						"pixelDust", 
+						"sunflowerPixel",
+						"abstractSpatter",
+						"rainbowBridge"	
+					]	
+					MouseArea {
+						required property var modelData
+						height: 20
+						width: 120
+						Text {
+							anchors.centerIn: parent
+							text: modelData
+							color: white
+							font.pixelSize: 13
+						}
+						onClicked: {
+							wallpaper = modelData
+							wallpaperChange.running = true
+						}
+					}
+				}
+			}
+		}	
+
+		Process {
+			id: wallpaperChange
+			command: ["sh", "-c", "swww img --transition-type fade --transition-duration 1 ~/wallpaper/" + wallpaper + ".png"]
+			running: false
+		}
 
     Text {
       id: clock
 			color: white  
-      font { pixelSize: 15; bold: true }
+			font { 
+				pixelSize: 15
+				bold: true 
+				family: "JetBrains Mono"
+			}
       text: Qt.formatDateTime(new Date(), "HH:mm:ss")
     }
-	
+
+		GlobalShortcut {
+        appid: "quickshell"
+				name: "subwindow_toggle"	
+
+        onPressed: {
+            subwindow.visible = !subwindow.visible
+        }
+    }
+
     Timer {
       interval: 1000
       running: true
