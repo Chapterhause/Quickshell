@@ -5,6 +5,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
 import QtQuick.Controls
+import Quickshell.Services.Notifications
 
 ShellRoot {
 	property int batLevel
@@ -26,9 +27,10 @@ ShellRoot {
 		PanelWindow {
 			id: bar
 			anchors.top: true
-		  anchors.left: true
-		  anchors.right: true
+//		  anchors.left: true
+//		  anchors.right: true
 		  implicitHeight: 40
+			implicitWidth: 500
 			color: black		
 			focusable: true	
 		
@@ -38,14 +40,14 @@ ShellRoot {
 			spacing: 20
 			
 			RowLayout {
-				spacing: 10
+				spacing: 3
 	   	 Repeater {
 		      model: 9
 		
 		      Text {
 		        property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
 		        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
-		        text: index + 1
+		        text: ws ? index + 1 : "" 
 		        color: isActive ? blue : (ws ? white : black)
 		        font { pixelSize: 15; bold: true }
 		
@@ -56,40 +58,30 @@ ShellRoot {
 		      }
 	    	}	
 			}	
-			
-			Item { width: 40}		
+				
 	
-			ColumnLayout {
-				spacing: 15
-				anchors.margins: 3
-				Brightness { 
-					Layout.preferredHeight: 3
-				}
-	
-				Audio { }
-			}	
+//			ColumnLayout {
+//				spacing: 15
+//				anchors.margins: 3
+//				Brightness { 
+//					Layout.preferredHeight: 3
+//				}
+//	
+//				Audio { }
+//			}	
 	
 			Process {
 					id: wallpaperChange		
-					command: [ "sh", "-c", "swww img --transition-type fade --transition-duration 1 ~/wallpaper/gruvbox/" + wallpaper + ".png"]
+					command: [ "sh", "-c", "awww img --transition-type fade --transition-duration 1 ~/wallpaper/gruvbox/" + wallpaper + ".png"]
 					running: false
 				}
-			
-	//		PopupWindow {
-	//			id: wallMenu	
-	//			anchor.window: bar
-	//    	anchor.rect.x: wallButton.x 
-	//			anchor.rect.y: parentWindow.height
-	//			color: black
-	//    	implicitWidth: 100
-	//    	implicitHeight: 50
-	//			visible: false
-		
+				
 				ScrollView {	
 					implicitWidth: 120
 					implicitHeight: 20	
 					ScrollBar.vertical.policy: ScrollBar.AlwaysOff
 					focus: true	
+					
 					ColumnLayout {		
 						Repeater {
 							model: [ 
@@ -103,6 +95,7 @@ ShellRoot {
 							"antennas",
 							"greenValley"
 						]	
+						
 						MouseArea {
 							required property var modelData
 							height: 20
@@ -120,15 +113,49 @@ ShellRoot {
 						}
 					}
 				}
+			}	
+
+//			Process {
+//				id: wifiConnect
+//				command: ["sh", "-c", "nmcli d wifi connect " + wifiField.text + " && sleep 15s"]
+//				running: false
+//				stdout: StdioCollector {
+//					onStreamFinished: wifiField.text = this.text
+//				}
+//			}
+
+			MouseArea {
+				id: batArea
+				width: 50
+				height: 20
+				hoverEnabled: true
+				Text {
+					text: (batLevel > 90) ? "󰁹" : (batLevel > 70) ? "󰂀" : (batLevel > 40) ? "󰁾" : (batLevel > 20) ? "󰁻" : "󰁺"
+					color: green
+					font.pixelSize: 17
+				}
+				onEntered: {
+					bat.running = true
+					batNotif.running = true
+				}
+			}			
+
+			Process {
+				id: batNotif
+				command: ["sh", "-c", "notify-send '" + batLevel + "%' 'Battery Level Check'"]
 			}
-	
-			Text {
-				id: battery
-				color: green
-				font { pixelSize: 15; bold: true }	
-				text: "󰁹 " + batLevel + "%"
-			}		
-	
+
+			Timer {
+				id: lowBatCheck
+				interval: 20000
+				running: true
+				repeat: true
+				onTriggered: {
+					bat.running = true
+					lowBatWarning.running = (batLevel < 20)
+				}
+			}
+
 			Process {
 				id: bat
 				command: ["sh", "-c", "upower -i /org/freedesktop/UPower/devices/battery_BATT | grep percentage | grep -o '[0-9]*'"]
@@ -137,13 +164,12 @@ ShellRoot {
 	    		onStreamFinished: batLevel = this.text
 	    	}
 			}
-		
-			Timer {
-				interval: 5000
-				running: true
-				repeat: true
-				onTriggered: bat.running = true
-			}
+
+			Process {
+				id: lowBatWarning
+				command: ["sh", "-c", "notify-send 'Only at " + batLevel + "%' 'Low battery - Charging recommended'"]
+				running: false
+			}	
 	
 			Text {
 				id: clock
@@ -178,11 +204,11 @@ ShellRoot {
 		Rectangle {
 			anchors.fill: parent
 			radius: 100
-			color: black
+			color: "transparent"
 
 			Repeater {
     		id: rep
-    		model: ["firefox", "obsidian", "blender", "krita", "gimp", "sunvox"]
+    		model: ["firefox", "gimp", "blender", "obsidian", "krita", "sunvox"]
 
     		delegate: Item {
        		height: 160
@@ -190,8 +216,8 @@ ShellRoot {
         	transformOrigin: Item.Center
         	rotation: 360 / rep.model.length * index
         	MouseArea {
-						height: 15
-						width: 60
+						height: 25
+						width: 80
 						hoverEnabled: true
 						onEntered: {
 							app = modelData
@@ -200,7 +226,8 @@ ShellRoot {
 						}
 						Rectangle {
 							anchors.fill: parent
-							color: grey
+							color: black
+							radius: 20
 							Text {
 								anchors.centerIn: parent
 								text: modelData
@@ -248,6 +275,86 @@ ShellRoot {
 			getCursorY.running = true
 			pieMenu.visible = !pieMenu.visible
     }
+	}
+
+	NotificationServer {
+		id: server
+		actionsSupported: true	
+		bodySupported: true
+
+		onNotification: n => {
+			n.tracked = true	
+		}
+	}
+
+	PanelWindow {
+		id: notifyWindow	
+		anchors.top: true
+		anchors.right: true
+		anchors.bottom: true	
+		
+		margins.top: 50
+
+		implicitWidth: 250
+		implicitHeight: 500
+		color: "transparent"
+		exclusionMode: ExclusionMode.Ignore
+
+		ColumnLayout {
+			width: parent.width		
+			spacing: 10
+
+			Repeater {
+				id: cards
+				model: server.trackedNotifications
+				delegate: Rectangle {
+					required property var modelData
+					width: parent.width	
+					height: 50
+					radius: 10	
+					border.color: white
+					border.width: 2
+					color: black
+
+					Timer {
+						running: true
+						interval: 5000
+						onTriggered: modelData.dismiss()
+					}
+
+					MouseArea {
+						anchors.fill: parent
+						onClicked: {
+							modelData.dismiss()
+						}
+				
+						ColumnLayout {	
+							width: parent.width	
+							spacing: 2
+							
+							Text { 	
+								topPadding: 5
+								leftPadding: 8
+								text: modelData.summary
+								width: parent.width
+								color: white
+								font.bold: true
+								elide: Text.ElideRight
+							}
+	
+							Text {
+								leftPadding: 8
+								visible: text !== ""
+								width: parent.width
+								text: modelData.body
+								color: white
+								wrapMode: Text.WordWrap	
+							}
+						}	
+					}
+				}
+			}
+		}
 	}
 }
 	
