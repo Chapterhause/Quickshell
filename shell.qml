@@ -147,7 +147,7 @@ ShellRoot {
 
 			Timer {
 				id: lowBatCheck
-				interval: 20000
+				interval: 1000000
 				running: true
 				repeat: true
 				onTriggered: {
