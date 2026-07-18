@@ -6,12 +6,19 @@ import QtQuick.Layouts
 import Quickshell.Io
 import QtQuick.Controls
 import Quickshell.Services.Notifications
+import Quickshell.Services.UPower 
 
-ShellRoot {
-	property int batLevel
+ShellRoot {	
 	property int volume
 	property int pieX
 	property int pieY
+
+// For battery notifications
+	property bool isCharging: UPower.displayDevice.state == UPowerDeviceState.Charging
+	property bool	chargePending: UPower.displayDevice.state == UPowerDeviceState.PendingCharge
+	property bool wasCharging: false
+	property real timeUntilCharged: UPower.displayDevice.timeToFull
+	property real batLevel: UPower.displayDevice.percentage * 100
 
 // Colors
 	property string black: "#282828" 	
@@ -26,116 +33,107 @@ ShellRoot {
 	
 		PanelWindow {
 			id: bar
-			anchors.top: true
-//		  anchors.left: true
-//		  anchors.right: true
-		  implicitHeight: 40
-			implicitWidth: 500
-			color: black		
+			anchors.top: true	
+			implicitHeight: 40
+			implicitWidth: 200
+			color: "transparent"
 			focusable: true	
-		
-	  RowLayout {
-	    anchors.fill: parent
-			anchors.margins: 8
-			spacing: 20
+		Rectangle {
+			anchors.fill: parent
+			color: black
+			bottomRightRadius: 10
+			bottomLeftRadius: 10
+
+	  	RowLayout {
+		    anchors.fill: parent
+				anchors.margins: 8
+				spacing: 20
+				
+				RowLayout {
+					spacing: 3
+		   	 Repeater {
+			      model: 3
 			
-			RowLayout {
-				spacing: 3
-	   	 Repeater {
-		      model: 9
+			      Text {
+			        property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
+			        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
+			        text: ws ? index + 1 : "" 
+			        color: isActive ? blue : (ws ? white : black)
+			        font { pixelSize: 15; bold: true }
+			
+			        MouseArea {
+			          anchors.fill: parent
+			          onClicked: Hyprland.dispatch("workspace " + (index + 1))
+			        }
+			      }
+		    	}	
+				}		
 		
-		      Text {
-		        property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
-		        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
-		        text: ws ? index + 1 : "" 
-		        color: isActive ? blue : (ws ? white : black)
-		        font { pixelSize: 15; bold: true }
-		
-		        MouseArea {
-		          anchors.fill: parent
-		          onClicked: Hyprland.dispatch("workspace " + (index + 1))
-		        }
-		      }
-	    	}	
-			}	
-				
+//				Process {
+//						id: wallpaperChange		
+//						command: [ "sh", "-c", "awww img --transition-type fade --transition-duration 1 ~/wallpaper/gruvbox/" + wallpaper + ".png"]
+//						running: false
+//					}
+//					
+//					ScrollView {	
+//						implicitWidth: 120
+//						implicitHeight: 20	
+//						ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+//						focus: true	
+//						
+//						ColumnLayout {		
+//							Repeater {
+//								model: [ 
+//								"paintForest", 
+//								"studio", 
+//								"vendingMachines", 
+//								"corona",
+//								"cherryBlossom",
+//								"minimalSunset",
+//								"starfish",
+//								"antennas",
+//								"greenValley"
+//							]	
+//							
+//							MouseArea {
+//								required property var modelData
+//								height: 64
+//								width: 64
+//								Image {	
+//									source: "/home/simonn/wallpaper/gruvbox/" + modelData + ".png"
+//									fillMode: Image.Stretch
+//									sourceSize.width: 64
+//									sourceSize.height: 64
+//								}
+//								onClicked: {
+//									wallpaper = modelData
+//									wallpaperChange.running = true
+//								}
+//							}
+//						}
+//					}
+//				}	
 	
-//			ColumnLayout {
-//				spacing: 15
-//				anchors.margins: 3
-//				Brightness { 
-//					Layout.preferredHeight: 3
-//				}
-//	
-//				Audio { }
-//			}	
+	//			Process {
+	//				id: wifiConnect
+	//				command: ["sh", "-c", "nmcli d wifi connect " + wifiField.text + " && sleep 15s"]
+	//				running: false
+	//				stdout: StdioCollector {
+	//					onStreamFinished: wifiField.text = this.text
+	//				}
+	//			}
 	
-			Process {
-					id: wallpaperChange		
-					command: [ "sh", "-c", "awww img --transition-type fade --transition-duration 1 ~/wallpaper/gruvbox/" + wallpaper + ".png"]
-					running: false
-				}
-				
-				ScrollView {	
-					implicitWidth: 120
-					implicitHeight: 20	
-					ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-					focus: true	
-					
-					ColumnLayout {		
-						Repeater {
-							model: [ 
-							"paintForest", 
-							"studio", 
-							"vendingMachines", 
-							"corona",
-							"cherryBlossom",
-							"minimalSunset",
-							"starfish",
-							"antennas",
-							"greenValley"
-						]	
-						
-						MouseArea {
-							required property var modelData
-							height: 20
-							width: 120
-							Text {
-								anchors.centerIn: parent
-								text: modelData
-								color: white
-								font.pixelSize: 13
-							}
-							onClicked: {
-								wallpaper = modelData
-								wallpaperChange.running = true
-							}
-						}
+				MouseArea {
+					id: batArea
+					width: 20
+					height: 20	
+					hoverEnabled: true
+					Text {
+						text: isCharging ? "󰂄" : (batLevel > 90) ? "󰁹" : (batLevel > 70) ? "󰂀" : (batLevel > 40) ? "󰁾" : (batLevel > 20) ? "󰁻" : "󰁺" 
+						color: green
+						font.pixelSize: 19
 					}
-				}
-			}	
-
-//			Process {
-//				id: wifiConnect
-//				command: ["sh", "-c", "nmcli d wifi connect " + wifiField.text + " && sleep 15s"]
-//				running: false
-//				stdout: StdioCollector {
-//					onStreamFinished: wifiField.text = this.text
-//				}
-//			}
-
-			MouseArea {
-				id: batArea
-				width: 50
-				height: 20
-				hoverEnabled: true
-				Text {
-					text: (batLevel > 90) ? "󰁹" : (batLevel > 70) ? "󰂀" : (batLevel > 40) ? "󰁾" : (batLevel > 20) ? "󰁻" : "󰁺"
-					color: green
-					font.pixelSize: 17
-				}
-				onEntered: {
-					bat.running = true
+				onEntered: { 
 					batNotif.running = true
 				}
 			}			
@@ -146,23 +144,30 @@ ShellRoot {
 			}
 
 			Timer {
-				id: lowBatCheck
-				interval: 1000000
+				id: chargeCheck
+				interval: 15000
 				running: true
 				repeat: true
 				onTriggered: {
-					bat.running = true
-					lowBatWarning.running = (batLevel < 20)
+					chargingNotif.running = (wasCharging !== (isCharging || chargePending))	
+					wasCharging = (isCharging || chargePending)	
 				}
-			}
+			}		
 
 			Process {
-				id: bat
-				command: ["sh", "-c", "upower -i /org/freedesktop/UPower/devices/battery_BATT | grep percentage | grep -o '[0-9]*'"]
+				id: chargingNotif
+				command: [ "sh", "-c", "notify-send 'Laptop is now " + (isCharging ? "charging' 'Time until full: '" + timeUntilCharged : "discharging' 'Time until empty: unknown'")]
+				running: false
+			}
+			
+			Timer {
+				id: lowBatCheck
+				interval: 600000 // 600000 = Ten minutes
 				running: true
-				stdout: StdioCollector {
-	    		onStreamFinished: batLevel = this.text
-	    	}
+				repeat: true
+				onTriggered: {	
+					lowBatWarning.running = (batLevel < 20)
+				}
 			}
 
 			Process {
@@ -190,6 +195,7 @@ ShellRoot {
 				onTriggered: clock.text = Qt.formatDateTime(new Date(), "HH:mm:ss") 
 			}
 		}	
+	}
 	}
 
 	PopupWindow {
