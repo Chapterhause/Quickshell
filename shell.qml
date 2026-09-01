@@ -10,8 +10,8 @@ import Quickshell.Services.UPower
 
 ShellRoot {	
 	property int volume
-	property int pieX
-	property int pieY
+//	property int pieX
+//	property int pieY
 
 // For battery notifications
 	property bool isCharging: UPower.displayDevice.state == UPowerDeviceState.Charging
@@ -29,7 +29,7 @@ ShellRoot {
 	property string green: "#98971A"
 	
 	property string wallpaper: "paintForest"	
-	property string app: "firefox"
+	property string app: ""	
 	
 		PanelWindow {
 			id: bar
@@ -41,6 +41,11 @@ ShellRoot {
 		Rectangle {
 			anchors.fill: parent
 			color: black
+			gradient: Gradient {
+//				orientation: Gradient.Horizontal
+        GradientStop { position: -1.2; color: grey }
+        GradientStop { position: 0.7; color: black }
+    	}
 			bottomRightRadius: 10
 			bottomLeftRadius: 10
 
@@ -59,7 +64,7 @@ ShellRoot {
 			        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
 			        text: ws ? index + 1 : "" 
 			        color: isActive ? blue : (ws ? white : black)
-			        font { pixelSize: 15; bold: true }
+			        font { pixelSize: 17; bold: true; family: "JetBrains Mono" }
 			
 			        MouseArea {
 			          anchors.fill: parent
@@ -126,7 +131,8 @@ ShellRoot {
 				MouseArea {
 					id: batArea
 					width: 20
-					height: 20	
+					height: 25	
+					anchors.verticalCenter: bar
 					hoverEnabled: true
 					Text {
 						text: isCharging ? "󰂄" : (batLevel > 90) ? "󰁹" : (batLevel > 70) ? "󰂀" : (batLevel > 40) ? "󰁾" : (batLevel > 20) ? "󰁻" : "󰁺" 
@@ -166,7 +172,7 @@ ShellRoot {
 				running: true
 				repeat: true
 				onTriggered: {	
-					lowBatWarning.running = (batLevel < 20)
+					lowBatWarning.running = (batLevel < 20) && !isCharging
 				}
 			}
 
@@ -179,7 +185,7 @@ ShellRoot {
 			Text {
 				id: clock
 				color: white 
-				font { pixelSize: 15; bold: true }
+				font { pixelSize: 16; bold: true; family: "JetBrains Mono" }
 				text: Qt.formatDateTime(new Date(), "HH:mm:ss")
 				ToolTip {
 					visible: hover
@@ -198,74 +204,81 @@ ShellRoot {
 	}
 	}
 
+	PanelWindow {
+		id: pAnchor	
+		color: "transparent"
+		anchors.top: true
+		anchors.right: true			
+	}
+
 	PopupWindow {
-		id: pieMenu
-		anchor.window: bar
-		anchor.rect.x: pieX - 100
-		anchor.rect.y: pieY - 100
-		implicitWidth: 200
-		implicitHeight: 200		
+		id: pieMenu	
+		anchor.window: pAnchor		
+		anchor.gravity: Edges.Top | Edges.Left
+		implicitWidth: 1400
+		implicitHeight: 1000
 		visible: false	
 		color: "transparent"
-		Rectangle {
-			anchors.fill: parent
-			radius: 100
-			color: "transparent"
-
 			Repeater {
-    		id: rep
-    		model: ["firefox", "gimp", "blender", "obsidian", "krita", "sunvox"]
-
+				id: rep	
+				model: ["firefox", "nemo", "blender", "obsidian", "rawtherapee", "sioyek"]	
     		delegate: Item {
-       		height: 160
-        	anchors.centerIn: parent
-        	transformOrigin: Item.Center
+					id: element
+					height: 500
+					width: 160
+					y: -50
+					x: 625
+        	transformOrigin: Item.Bottom
         	rotation: 360 / rep.model.length * index
-        	MouseArea {
-						height: 25
-						width: 80
+					
+					MouseArea {
+						id: pieButton
+						anchors.fill: parent	
 						hoverEnabled: true
 						onEntered: {
-							app = modelData
-							launchApp.running = true
-							pieMenu.visible = false
+							app = modelData		
 						}
-						Rectangle {
-							anchors.fill: parent
+						
+						Rectangle {	
 							color: black
-							radius: 20
+							anchors.centerIn: element
+							y: 400
+							width: 150
+							height: 20
+							radius: 20	
+							rotation: -element.rotation
+							
 							Text {
-								anchors.centerIn: parent
 								text: modelData
-								color: white
-								font.pixelSize: 17
+								anchors.centerIn: parent
+								color: modelData == app ? blue : white
+								font.pixelSize: 17 	
 							} 
 						}
 						anchors.horizontalCenter: parent.horizontalCenter
-         	  rotation: -parent.rotation // If you want to have them upright
 					}
     		}
 			}
-		}	
+			
 	}
 
-	Process {
-		id: getCursorX
-		command: [ "sh", "-c", "hyprctl cursorpos | grep -o '[0-9]*' | sed -n -e '1p; 2q'" ]
-		stdout: StdioCollector {
-	    onStreamFinished: pieX = this.text
-		}
-		running: false
-	}
+//	Process {
+//		id: getCursorX
+//		command: [ "sh", "-c", "hyprctl cursorpos | grep -o '[0-9]*' | sed -n -e '1p; 2q'" ]
+//		stdout: StdioCollector {
+//	    onStreamFinished: pieX = this.text
+//		}
+//		running: false
+//	}
 
-	Process {
-		id: getCursorY
-		command: [ "sh", "-c", "hyprctl cursorpos | grep -o '[0-9]*' | sed -n -e '2p; 3q'" ]
-		stdout: StdioCollector {
-	    onStreamFinished: pieY= this.text
-		}
-		running: false
-	}
+//	Process {
+//		id: getCursorY
+//		command: [ "sh", "-c", "hyprctl cursorpos | grep -o '[0-9]*' | sed -n -e '2p; 3q'" ]
+//		stdout: StdioCollector {
+//	    onStreamFinished: pieY= this.text
+//		}
+//		running: false
+//	}
 
 	Process {
 		id: launchApp
@@ -276,11 +289,13 @@ ShellRoot {
 	GlobalShortcut {
     appid: "quickshell"
     name: "pieMenuToggle"
-    onPressed: {
-			getCursorX.running = true
-			getCursorY.running = true
-			pieMenu.visible = !pieMenu.visible
-    }
+    onPressed: {	
+			pieMenu.visible =	true 
+		}
+		onReleased: {
+			pieMenu.visible = false
+			launchApp.running = true
+		}
 	}
 
 	NotificationServer {
@@ -345,6 +360,7 @@ ShellRoot {
 								width: parent.width
 								color: white
 								font.bold: true
+								font.family: "JetBrains Mono"
 								elide: Text.ElideRight
 							}
 	
@@ -354,6 +370,7 @@ ShellRoot {
 								width: parent.width
 								text: modelData.body
 								color: white
+								font.family: "JetBrains Mono"
 								wrapMode: Text.WordWrap	
 							}
 						}	
