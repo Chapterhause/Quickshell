@@ -10,9 +10,7 @@ import Quickshell.Services.UPower
 
 ShellRoot {	
 	property int volume
-//	property int pieX
-//	property int pieY
-
+	
 // For battery notifications
 	property bool isCharging: UPower.displayDevice.state == UPowerDeviceState.Charging
 	property bool	chargePending: UPower.displayDevice.state == UPowerDeviceState.PendingCharge
@@ -29,7 +27,7 @@ ShellRoot {
 	property string green: "#98971A"
 	
 	property string wallpaper: "paintForest"	
-	property string app: ""	
+	property string app: "firefox"	
 	
 		PanelWindow {
 			id: bar
@@ -43,8 +41,8 @@ ShellRoot {
 			color: black
 			gradient: Gradient {
 //				orientation: Gradient.Horizontal
-        GradientStop { position: -1.2; color: grey }
-        GradientStop { position: 0.7; color: black }
+        GradientStop { position: -1.8; color: grey }
+        GradientStop { position: 0.4; color: black }
     	}
 			bottomRightRadius: 10
 			bottomLeftRadius: 10
@@ -212,12 +210,12 @@ ShellRoot {
 	}
 
 	PopupWindow {
-		id: pieMenu	
-		anchor.window: pAnchor		
+		id: pieMenu		
+		anchor.window: pAnchor
 		anchor.gravity: Edges.Top | Edges.Left
 		implicitWidth: 1400
-		implicitHeight: 1000
-		visible: false	
+		implicitHeight: 1000 
+		visible: false
 		color: "transparent"
 			Repeater {
 				id: rep	
@@ -262,24 +260,6 @@ ShellRoot {
 			
 	}
 
-//	Process {
-//		id: getCursorX
-//		command: [ "sh", "-c", "hyprctl cursorpos | grep -o '[0-9]*' | sed -n -e '1p; 2q'" ]
-//		stdout: StdioCollector {
-//	    onStreamFinished: pieX = this.text
-//		}
-//		running: false
-//	}
-
-//	Process {
-//		id: getCursorY
-//		command: [ "sh", "-c", "hyprctl cursorpos | grep -o '[0-9]*' | sed -n -e '2p; 3q'" ]
-//		stdout: StdioCollector {
-//	    onStreamFinished: pieY= this.text
-//		}
-//		running: false
-//	}
-
 	Process {
 		id: launchApp
 		command: [ "sh", "-c", app ]
@@ -288,14 +268,19 @@ ShellRoot {
 
 	GlobalShortcut {
     appid: "quickshell"
-    name: "pieMenuToggle"
+    name: "pieMenuOn"
     onPressed: {	
-			pieMenu.visible =	true 
-		}
-		onReleased: {
+			pieMenu.visible = true	
+		}	
+	}
+
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "pieMenuOff"
+    onPressed: {	
 			pieMenu.visible = false
 			launchApp.running = true
-		}
+		}	
 	}
 
 	NotificationServer {
@@ -379,5 +364,4 @@ ShellRoot {
 			}
 		}
 	}
-}
-	
+}	
