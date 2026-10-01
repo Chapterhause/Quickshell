@@ -272,16 +272,20 @@ ShellRoot {
     onPressed: {	
 			pieMenu.visible = true	
 		}	
+		onReleased: {
+			pieMenu.visible = false
+			launchApp.running = true	
+		}
 	}
 
-  GlobalShortcut {
-    appid: "quickshell"
-    name: "pieMenuOff"
-    onPressed: {	
-			pieMenu.visible = false
-			launchApp.running = true
-		}	
-	}
+//  GlobalShortcut {
+//    appid: "quickshell"
+//    name: "pieMenuOff"
+//    onPressed: {	
+//			pieMenu.visible = false
+//			launchApp.running = true
+//		}	
+//	}
 
 	NotificationServer {
 		id: server
