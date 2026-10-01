@@ -272,14 +272,14 @@ ShellRoot {
     onPressed: {	
 			pieMenu.visible = true	
 		}	
-		onReleased: {
+		onReleased: {	
+			launchApp.running = pieMenu.visible ? true : false
 			pieMenu.visible = false
-			launchApp.running = true	
 		}
 	}
 
 //  GlobalShortcut {
-//    appid: "quickshell"
+//    appid: "quickshell"ble
 //    name: "pieMenuOff"
 //    onPressed: {	
 //			pieMenu.visible = false
