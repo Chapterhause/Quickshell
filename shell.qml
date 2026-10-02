@@ -28,6 +28,7 @@ ShellRoot {
 	
 	property string wallpaper: "paintForest"	
 	property string app: "firefox"	
+	property bool pomodoro: false
 	
 		PanelWindow {
 			id: bar
@@ -36,37 +37,37 @@ ShellRoot {
 			implicitWidth: 200
 			color: "transparent"
 			focusable: true	
-		Rectangle {
-			anchors.fill: parent
-			color: black
-			gradient: Gradient {
+			Rectangle {
+				anchors.fill: parent
+				color: black
+				gradient: Gradient {
 //				orientation: Gradient.Horizontal
-        GradientStop { position: -1.8; color: grey }
-        GradientStop { position: 0.4; color: black }
-    	}
-			bottomRightRadius: 10
-			bottomLeftRadius: 10
-
-	  	RowLayout {
-		    anchors.fill: parent
-				anchors.margins: 8
-				spacing: 20
+	        GradientStop { position: -1.8; color: grey }
+	        GradientStop { position: 0.4; color: black }
+	    	}
+				bottomRightRadius: 10
+				bottomLeftRadius: 10
+	
+		  	RowLayout {
+			    anchors.fill: parent
+					anchors.margins: 8
+					spacing: 20
+					
+					RowLayout {
+						spacing: 3
+				   	Repeater {
+				      model: 3
 				
-				RowLayout {
-					spacing: 3
-		   	 Repeater {
-			      model: 3
-			
-			      Text {
-			        property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
-			        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
-			        text: ws ? index + 1 : "" 
-			        color: isActive ? blue : (ws ? white : black)
-			        font { pixelSize: 17; bold: true; family: "JetBrains Mono" }
-			
-			        MouseArea {
-			          anchors.fill: parent
-			          onClicked: Hyprland.dispatch("workspace " + (index + 1))
+				      Text {
+				        property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
+				        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
+				        text: ws ? index + 1 : "" 
+				        color: isActive ? blue : (ws ? white : black)
+				        font { pixelSize: 17; bold: true; family: "JetBrains Mono" }
+				
+				        MouseArea {
+				          anchors.fill: parent
+				          onClicked: Hyprland.dispatch("workspace " + (index + 1))
 			        }
 			      }
 		    	}	
@@ -137,7 +138,7 @@ ShellRoot {
 						color: green
 						font.pixelSize: 19
 					}
-				onEntered: { 
+				onPressed: { 
 					batNotif.running = true
 				}
 			}			
@@ -179,27 +180,78 @@ ShellRoot {
 				command: ["sh", "-c", "notify-send 'Only at " + batLevel + "%' 'Low battery - Charging recommended'"]
 				running: false
 			}	
-	
-			Text {
-				id: clock
-				color: white 
-				font { pixelSize: 16; bold: true; family: "JetBrains Mono" }
-				text: Qt.formatDateTime(new Date(), "HH:mm:ss")
-				ToolTip {
-					visible: hover
-					text: "Test"
-					delay: 10
-				} 
+			MouseArea {	
+				width: 60
+				height: 20
+				onPressed: {
+					pomodoro = true
+					pomStart.running = true
+					pomWork.running = true
+					clock.text = " "
+				}
+				Text {
+					anchors.centerIn: parent	
+					id: clock
+					color: white 
+					font { pixelSize: 16; bold: true; family: "JetBrains Mono" }
+					text: Qt.formatDateTime(new Date(), "HH:mm:ss")
+					ToolTip {
+						visible: hover
+						text: "Test"
+						delay: 10
+					} 
+				}
 			}
 		
-			Timer {
-				interval: 1000
-				running: true
-				repeat: true
-				onTriggered: clock.text = Qt.formatDateTime(new Date(), "HH:mm:ss") 
-			}
-		}	
-	}
+				Timer {	
+					interval: 1000
+					running: !pomodoro
+					repeat: true
+					onTriggered: clock.text = Qt.formatDateTime(new Date(), "HH:mm:ss") 
+				}
+
+				Timer {
+					id: pomWork
+					interval: 300000 //1500000 = 25 min
+					running: false 
+					repeat: false
+					onTriggered: {
+						pomBreakNotif.running = true
+						pomBreak.running = true	
+					}
+				}
+
+				Process {
+					id: pomStart
+					running: false
+					command: ["sh", "-c", "notify-send 'Pomodoro Started' '25 minutes on the clock...'"]
+				}
+				
+				Process {
+					id: pomBreakNotif
+					running: false
+					command: ["sh", "-c", "notify-send 'Break started' '5 minutes on the clock...'"]
+				}
+
+				Process {
+					id: pomEndNotif
+					running: false
+					command: ["sh", "-c", "notify-send 'All Done!' 'Press the clock to start again'"]
+				}
+				
+				Timer {
+					id: pomBreak
+					interval: 300000 //300000 = 5 min
+					running: false
+					repeat: false	
+					onTriggered: {
+						pomEndNotif.running = true	
+						pomodoro = false
+					}
+				}
+
+			}	
+		}
 	}
 
 	PanelWindow {
