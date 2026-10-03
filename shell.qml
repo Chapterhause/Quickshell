@@ -212,7 +212,7 @@ ShellRoot {
 
 				Timer {
 					id: pomWork
-					interval: 300000 //1500000 = 25 min
+					interval: 1500000 //1500000 = 25 min
 					running: false 
 					repeat: false
 					onTriggered: {
@@ -350,17 +350,15 @@ ShellRoot {
 	}
 
 	PanelWindow {
-		id: notifyWindow	
-		anchors.top: true
+		id: notifyWindow		
 		anchors.right: true
-		anchors.bottom: true	
-		
+		anchors.bottom: true		
+		anchors.top: true
 		margins.top: 50
 
-		implicitWidth: 250
+		implicitWidth: 150
 		implicitHeight: 500
-		color: "transparent"
-		exclusionMode: ExclusionMode.Ignore
+		color: "transparent" 
 
 		ColumnLayout {
 			width: parent.width		
