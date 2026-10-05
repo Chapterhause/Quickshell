@@ -33,224 +33,303 @@ ShellRoot {
 		PanelWindow {
 			id: bar
 			anchors.top: true	
-			implicitHeight: 40
-			implicitWidth: 200
+			anchors.right: true
+			anchors.left: true
+			implicitHeight: 40	
 			color: "transparent"
 			focusable: true	
-			Rectangle {
+			RowLayout {
+				spacing: 10
 				anchors.fill: parent
-				color: black
-				gradient: Gradient {
-//				orientation: Gradient.Horizontal
-	        GradientStop { position: -1.8; color: grey }
-	        GradientStop { position: 0.4; color: black }
-	    	}
-				bottomRightRadius: 10
-				bottomLeftRadius: 10
-	
-		  	RowLayout {
-			    anchors.fill: parent
-					anchors.margins: 8
-					spacing: 20
-					
-					RowLayout {
-						spacing: 3
-				   	Repeater {
-				      model: 3
-				
-				      Text {
-				        property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
-				        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
-				        text: ws ? index + 1 : "" 
-				        color: isActive ? blue : (ws ? white : black)
-				        font { pixelSize: 17; bold: true; family: "JetBrains Mono" }
-				
-				        MouseArea {
-				          anchors.fill: parent
-				          onClicked: Hyprland.dispatch("workspace " + (index + 1))
-			        }
-			      }
-		    	}	
-				}		
-		
-//				Process {
-//						id: wallpaperChange		
-//						command: [ "sh", "-c", "awww img --transition-type fade --transition-duration 1 ~/wallpaper/gruvbox/" + wallpaper + ".png"]
-//						running: false
-//					}
-//					
-//					ScrollView {	
-//						implicitWidth: 120
-//						implicitHeight: 20	
-//						ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-//						focus: true	
-//						
-//						ColumnLayout {		
-//							Repeater {
-//								model: [ 
-//								"paintForest", 
-//								"studio", 
-//								"vendingMachines", 
-//								"corona",
-//								"cherryBlossom",
-//								"minimalSunset",
-//								"starfish",
-//								"antennas",
-//								"greenValley"
-//							]	
-//							
-//							MouseArea {
-//								required property var modelData
-//								height: 64
-//								width: 64
-//								Image {	
-//									source: "/home/simonn/wallpaper/gruvbox/" + modelData + ".png"
-//									fillMode: Image.Stretch
-//									sourceSize.width: 64
-//									sourceSize.height: 64
-//								}
-//								onClicked: {
-//									wallpaper = modelData
-//									wallpaperChange.running = true
-//								}
-//							}
-//						}
-//					}
-//				}	
-	
-	//			Process {
-	//				id: wifiConnect
-	//				command: ["sh", "-c", "nmcli d wifi connect " + wifiField.text + " && sleep 15s"]
-	//				running: false
-	//				stdout: StdioCollector {
-	//					onStreamFinished: wifiField.text = this.text
-	//				}
-	//			}
-	
-				MouseArea {
-					id: batArea
-					width: 20
-					height: 25	
+				anchors.centerIn: parent
+				Rectangle {
+					id: filler
+					implicitWidth: 500
+					implicitHeight: 40
+					color: "transparent" 
+				}
+
+				Rectangle { 
+					id: barContent
 					anchors.verticalCenter: bar
-					hoverEnabled: true
-					Text {
-						text: isCharging ? "󰂄" : (batLevel > 90) ? "󰁹" : (batLevel > 70) ? "󰂀" : (batLevel > 40) ? "󰁾" : (batLevel > 20) ? "󰁻" : "󰁺" 
-						color: green
-						font.pixelSize: 19
+					implicitHeight: 40
+					implicitWidth: 200
+					color: black
+					gradient: Gradient {
+	//				orientation: Gradient.Horizontal
+		        GradientStop { position: -1.8; color: grey }
+		        GradientStop { position: 0.4; color: black }
+		    	}
+					bottomRightRadius: 10
+					bottomLeftRadius: 10
+		
+			  	RowLayout {
+				    anchors.fill: parent
+						anchors.margins: 8
+						spacing: 20
+						
+						RowLayout {
+							spacing: 3
+					   	Repeater {
+					      model: 3
+					
+					      Text {
+					        property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
+					        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
+					        text: ws ? index + 1 : "" 
+					        color: isActive ? blue : (ws ? white : black)
+					        font { pixelSize: 17; bold: true; family: "JetBrains Mono" }
+					
+					        MouseArea {
+					          anchors.fill: parent
+					          onClicked: Hyprland.dispatch("workspace " + (index + 1))
+				        }
+				      }
+			    	}	
+					}		
+			
+	//				Process {
+	//						id: wallpaperChange		
+	//						command: [ "sh", "-c", "awww img --transition-type fade --transition-duration 1 ~/wallpaper/gruvbox/" + wallpaper + ".png"]
+	//						running: false
+	//					}
+	//					
+	//					ScrollView {	
+	//						implicitWidth: 120
+	//						implicitHeight: 20	
+	//						ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+	//						focus: true	
+	//						
+	//						ColumnLayout {		
+	//							Repeater {
+	//								model: [ 
+	//								"paintForest", 
+	//								"studio", 
+	//								"vendingMachines", 
+	//								"corona",
+	//								"cherryBlossom",
+	//								"minimalSunset",
+	//								"starfish",
+	//								"antennas",
+	//								"greenValley"
+	//							]	
+	//							
+	//							MouseArea {
+	//								required property var modelData
+	//								height: 64
+	//								width: 64
+	//								Image {	
+	//									source: "/home/simonn/wallpaper/gruvbox/" + modelData + ".png"
+	//									fillMode: Image.Stretch
+	//									sourceSize.width: 64
+	//									sourceSize.height: 64
+	//								}
+	//								onClicked: {
+	//									wallpaper = modelData
+	//									wallpaperChange.running = true
+	//								}
+	//							}
+	//						}
+	//					}
+	//				}	
+		
+		//			Process {
+		//				id: wifiConnect
+		//				command: ["sh", "-c", "nmcli d wifi connect " + wifiField.text + " && sleep 15s"]
+		//				running: false
+		//				stdout: StdioCollector {
+		//					onStreamFinished: wifiField.text = this.text
+		//				}
+		//			}
+		
+					MouseArea {
+						id: batArea
+						width: 20
+						height: 25	
+						anchors.verticalCenter: barContent 
+						hoverEnabled: true
+						Text {
+							text: isCharging ? "󰂄" : (batLevel > 90) ? "󰁹" : (batLevel > 70) ? "󰂀" : (batLevel > 40) ? "󰁾" : (batLevel > 20) ? "󰁻" : "󰁺" 
+							color: green
+							font.pixelSize: 19
+						}
+						onPressed: { 
+							batNotif.running = true
+						}
+					}			
+	
+				Process {
+					id: batNotif
+					command: ["sh", "-c", "notify-send '" + batLevel + "%' 'Battery Level Check'"]
+				}
+	
+				Timer {
+					id: chargeCheck
+					interval: 15000
+					running: true
+					repeat: true
+					onTriggered: {
+						chargingNotif.running = (wasCharging !== (isCharging || chargePending))	
+						wasCharging = (isCharging || chargePending)	
 					}
-				onPressed: { 
-					batNotif.running = true
+				}		
+	
+				Process {
+					id: chargingNotif
+					command: [ "sh", "-c", "notify-send 'Laptop is now " + (isCharging ? "charging' 'Time until full: '" + timeUntilCharged : "discharging' 'Time until empty: unknown'")]
+					running: false
 				}
-			}			
-
-			Process {
-				id: batNotif
-				command: ["sh", "-c", "notify-send '" + batLevel + "%' 'Battery Level Check'"]
-			}
-
-			Timer {
-				id: chargeCheck
-				interval: 15000
-				running: true
-				repeat: true
-				onTriggered: {
-					chargingNotif.running = (wasCharging !== (isCharging || chargePending))	
-					wasCharging = (isCharging || chargePending)	
+				
+				Timer {
+					id: lowBatCheck
+					interval: 600000 // 600000 = Ten minutes
+					running: true
+					repeat: true
+					onTriggered: {	
+						lowBatWarning.running = (batLevel < 20) && !isCharging
+					}
 				}
-			}		
-
-			Process {
-				id: chargingNotif
-				command: [ "sh", "-c", "notify-send 'Laptop is now " + (isCharging ? "charging' 'Time until full: '" + timeUntilCharged : "discharging' 'Time until empty: unknown'")]
-				running: false
+	
+				Process {
+					id: lowBatWarning
+					command: ["sh", "-c", "notify-send 'Only at " + batLevel + "%' 'Low battery - Charging recommended'"]
+					running: false
+				}	
+				MouseArea {	
+					width: 60
+					height: 20
+					onPressed: {
+						pomodoro = true
+						pomStart.running = true
+						pomWork.running = true
+						clock.text = " "
+					}
+					Text {
+						anchors.centerIn: parent	
+						id: clock
+						color: white 
+						font { pixelSize: 16; bold: true; family: "JetBrains Mono" }
+						text: Qt.formatDateTime(new Date(), "HH:mm:ss")
+						ToolTip {
+							visible: hover
+							text: "Test"
+							delay: 10
+						} 
+					}
+				}
+			
+					Timer {	
+						interval: 1000
+						running: !pomodoro
+						repeat: true
+						onTriggered: clock.text = Qt.formatDateTime(new Date(), "HH:mm:ss") 
+					}
+	
+					Timer {
+						id: pomWork
+						interval: 1500000 //1500000 = 25 min
+						running: false 
+						repeat: false
+						onTriggered: {
+							pomBreakNotif.running = true
+							pomBreak.running = true	
+						}
+					}
+	
+					Process {
+						id: pomStart
+						running: false
+						command: ["sh", "-c", "notify-send 'Pomodoro Started' '25 minutes on the clock...'"]
+					}
+					
+					Process {
+						id: pomBreakNotif
+						running: false
+						command: ["sh", "-c", "notify-send 'Break started' '5 minutes on the clock...'"]
+					}
+	
+					Process {
+						id: pomEndNotif
+						running: false
+						command: ["sh", "-c", "notify-send 'All Done!' 'Press the clock to start again'"]
+					}
+					
+					Timer {
+						id: pomBreak
+						interval: 300000 //300000 = 5 min
+						running: false
+						repeat: false	
+						onTriggered: {
+							pomEndNotif.running = true	
+							pomodoro = false
+						}
+					}	
+				}	
 			}
 			
-			Timer {
-				id: lowBatCheck
-				interval: 600000 // 600000 = Ten minutes
-				running: true
-				repeat: true
-				onTriggered: {	
-					lowBatWarning.running = (batLevel < 20) && !isCharging
-				}
-			}
+			Rectangle {
+				id: notifs
+				implicitWidth: 400
+				implicitHeight: 40
+				color: black
+				RowLayout {
+					implicitHeight: parent.height
+					spacing: 10
 
-			Process {
-				id: lowBatWarning
-				command: ["sh", "-c", "notify-send 'Only at " + batLevel + "%' 'Low battery - Charging recommended'"]
-				running: false
-			}	
-			MouseArea {	
-				width: 60
-				height: 20
-				onPressed: {
-					pomodoro = true
-					pomStart.running = true
-					pomWork.running = true
-					clock.text = " "
-				}
-				Text {
-					anchors.centerIn: parent	
-					id: clock
-					color: white 
-					font { pixelSize: 16; bold: true; family: "JetBrains Mono" }
-					text: Qt.formatDateTime(new Date(), "HH:mm:ss")
-					ToolTip {
-						visible: hover
-						text: "Test"
-						delay: 10
-					} 
-				}
-			}
+					Repeater {
+						id: cards
+						model: server.trackedNotifications
+						delegate: Rectangle {
+							required property var modelData
+							width: 150	
+							height: parent.height
+							radius: 10	
+							border.color: white
+							border.width: 2
+							color: black
 		
-				Timer {	
-					interval: 1000
-					running: !pomodoro
-					repeat: true
-					onTriggered: clock.text = Qt.formatDateTime(new Date(), "HH:mm:ss") 
-				}
-
-				Timer {
-					id: pomWork
-					interval: 1500000 //1500000 = 25 min
-					running: false 
-					repeat: false
-					onTriggered: {
-						pomBreakNotif.running = true
-						pomBreak.running = true	
+							Timer {
+								running: true
+								interval: 5000
+								onTriggered: modelData.dismiss()
+							}
+		
+							MouseArea {
+								anchors.fill: parent
+								onClicked: {
+									modelData.dismiss()
+								}
+						
+								ColumnLayout {	
+									width: parent.width	
+									spacing: 2
+									
+									Text { 	
+										topPadding: 5
+										leftPadding: 8
+										text: modelData.summary
+										width: parent.width
+										color: white
+										font.bold: true
+										font.family: "JetBrains Mono"
+										elide: Text.ElideRight
+									}
+			
+									Text {
+										leftPadding: 8
+										visible: text !== ""
+										width: parent.width
+										text: modelData.body
+										color: white
+										font.family: "JetBrains Mono"
+										wrapMode: Text.WordWrap	
+									}
+								}	
+							}
+						}
 					}
 				}
-
-				Process {
-					id: pomStart
-					running: false
-					command: ["sh", "-c", "notify-send 'Pomodoro Started' '25 minutes on the clock...'"]
-				}
-				
-				Process {
-					id: pomBreakNotif
-					running: false
-					command: ["sh", "-c", "notify-send 'Break started' '5 minutes on the clock...'"]
-				}
-
-				Process {
-					id: pomEndNotif
-					running: false
-					command: ["sh", "-c", "notify-send 'All Done!' 'Press the clock to start again'"]
-				}
-				
-				Timer {
-					id: pomBreak
-					interval: 300000 //300000 = 5 min
-					running: false
-					repeat: false	
-					onTriggered: {
-						pomEndNotif.running = true	
-						pomodoro = false
-					}
-				}
-
-			}	
+			}
 		}
 	}
 
@@ -349,73 +428,82 @@ ShellRoot {
 		}
 	}
 
-	PanelWindow {
-		id: notifyWindow		
-		anchors.right: true
-		anchors.bottom: true		
-		anchors.top: true
-		margins.top: 50
+//	PanelWindow {
+//		id: fillerWindow
+//		anchors.bottom: true
+//		anchors.left: true
+//		anchors.top: true
+//		implicitWidth: 100
+//		color: "transparent"
+//	}
 
-		implicitWidth: 150
-		implicitHeight: 500
-		color: "transparent" 
-
-		ColumnLayout {
-			width: parent.width		
-			spacing: 10
-
-			Repeater {
-				id: cards
-				model: server.trackedNotifications
-				delegate: Rectangle {
-					required property var modelData
-					width: parent.width	
-					height: 50
-					radius: 10	
-					border.color: white
-					border.width: 2
-					color: black
-
-					Timer {
-						running: true
-						interval: 5000
-						onTriggered: modelData.dismiss()
-					}
-
-					MouseArea {
-						anchors.fill: parent
-						onClicked: {
-							modelData.dismiss()
-						}
-				
-						ColumnLayout {	
-							width: parent.width	
-							spacing: 2
-							
-							Text { 	
-								topPadding: 5
-								leftPadding: 8
-								text: modelData.summary
-								width: parent.width
-								color: white
-								font.bold: true
-								font.family: "JetBrains Mono"
-								elide: Text.ElideRight
-							}
+//	PanelWindow {
+//		id: notifyWindow		
+//		anchors.right: true
+//		anchors.bottom: true		
+//		anchors.top: true
+//		margins.top: 50
+//
+//		implicitWidth: 100
+//		implicitHeight: 500
+//		color: "transparent" 
+//
+//		ColumnLayout {
+//			width: parent.width		
+//			spacing: 10
+//
+//			Repeater {
+//				id: cards
+//				model: server.trackedNotifications
+//				delegate: Rectangle {
+//					required property var modelData
+//					width: parent.width	
+//					height: 50
+//					radius: 10	
+//					border.color: white
+//					border.width: 2
+//					color: black
+//
+//					Timer {
+//						running: true
+//						interval: 5000
+//						onTriggered: modelData.dismiss()
+//					}
+//
+//					MouseArea {
+//						anchors.fill: parent
+//						onClicked: {
+//							modelData.dismiss()
+//						}
+//				
+//						ColumnLayout {	
+//							width: parent.width	
+//							spacing: 2
+//							
+//							Text { 	
+//								topPadding: 5
+//								leftPadding: 8
+//								text: modelData.summary
+//								width: parent.width
+//								color: white
+//								font.bold: true
+//								font.family: "JetBrains Mono"
+//								elide: Text.ElideRight
+//							}
+//	
+//							Text {
+//								leftPadding: 8
+//								visible: text !== ""
+//								width: parent.width
+//								text: modelData.body
+//								color: white
+//								font.family: "JetBrains Mono"
+//								wrapMode: Text.WordWrap	
+//							}
+//						}	
+//					}
+//				}
+//			}
+}
 	
-							Text {
-								leftPadding: 8
-								visible: text !== ""
-								width: parent.width
-								text: modelData.body
-								color: white
-								font.family: "JetBrains Mono"
-								wrapMode: Text.WordWrap	
-							}
-						}	
-					}
-				}
-			}
-		}
-	}
-}	
+	
