@@ -15,7 +15,7 @@ ShellRoot {
 	property bool isCharging: UPower.displayDevice.state == UPowerDeviceState.Charging
 	property bool	chargePending: UPower.displayDevice.state == UPowerDeviceState.PendingCharge
 	property bool wasCharging: false
-	property real timeUntilCharged: UPower.displayDevice.timeToFull
+	property int timeUntilCharged: UPower.displayDevice.timeToFull / 60	
 	property real batLevel: UPower.displayDevice.percentage * 100
 
 // Colors
@@ -51,7 +51,7 @@ ShellRoot {
 
 				Rectangle { 
 					id: barContent
-					anchors.verticalCenter: bar
+					anchors.horizontalCenter: bar
 					implicitHeight: 40
 					implicitWidth: 200
 					color: black
@@ -149,7 +149,7 @@ ShellRoot {
 						anchors.verticalCenter: barContent 
 						hoverEnabled: true
 						Text {
-							text: isCharging ? "󰂄" : (batLevel > 90) ? "󰁹" : (batLevel > 70) ? "󰂀" : (batLevel > 40) ? "󰁾" : (batLevel > 20) ? "󰁻" : "󰁺" 
+							text: isCharging ? "󰂄" : (batLevel > 85) ? "󰁹" : (batLevel > 60) ? "󰂀" : (batLevel > 40) ? "󰁾" : (batLevel > 20) ? "󰁻" : "󰁺" 
 							color: green
 							font.pixelSize: 19
 						}
@@ -176,7 +176,7 @@ ShellRoot {
 	
 				Process {
 					id: chargingNotif
-					command: [ "sh", "-c", "notify-send 'Laptop is now " + (isCharging ? "charging' 'Time until full: '" + timeUntilCharged : "discharging' 'Time until empty: unknown'")]
+					command: [ "sh", "-c", "notify-send 'Laptop is now " + (isCharging ? "charging' 'Time until full: '" + (timeUntilCharged==0 ? "unknown" : timeUntilCharged) : "discharging' 'Time until empty: unknown'")]
 					running: false
 				}
 				
@@ -269,62 +269,83 @@ ShellRoot {
 			
 			Rectangle {
 				id: notifs
-				implicitWidth: 400
+				implicitWidth: 450
 				implicitHeight: 40
-				color: black
+				color: "transparent"
 				RowLayout {
 					implicitHeight: parent.height
-					spacing: 10
+					spacing: 50
 
 					Repeater {
 						id: cards
 						model: server.trackedNotifications
-						delegate: Rectangle {
+						delegate: Item {
+							id: cardHolder
+							width: 250
+							height: 40
 							required property var modelData
-							width: 150	
-							height: parent.height
-							radius: 10	
-							border.color: white
-							border.width: 2
-							color: black
-		
-							Timer {
-								running: true
-								interval: 5000
-								onTriggered: modelData.dismiss()
-							}
-		
-							MouseArea {
+							Rectangle {
 								anchors.fill: parent
-								onClicked: {
-									modelData.dismiss()
-								}
-						
-								ColumnLayout {	
-									width: parent.width	
-									spacing: 2
-									
-									Text { 	
-										topPadding: 5
-										leftPadding: 8
-										text: modelData.summary
-										width: parent.width
-										color: white
-										font.bold: true
-										font.family: "JetBrains Mono"
-										elide: Text.ElideRight
-									}
+								id: notifCard	
+								anchors.horizontalCenter: parent
+								topRightRadius: 0
+								topLeftRadius: 0
+								radius: 10	
+//								border.color: white
+//								border.width: 2
+								color: black
 			
-									Text {
-										leftPadding: 8
-										visible: text !== ""
-										width: parent.width
-										text: modelData.body
-										color: white
-										font.family: "JetBrains Mono"
-										wrapMode: Text.WordWrap	
+								Timer {
+									running: true
+									interval: 5000
+									onTriggered: modelData.dismiss()
+								}
+			
+								MouseArea {
+									anchors.fill: notifCard
+									anchors.horizontalCenter: bar
+									onClicked: {
+										modelData.dismiss()
 									}
-								}	
+							
+									ColumnLayout {	
+										implicitHeight: parent.height - 5
+										implicitWidth: cardHolder.width
+										spacing: 10
+
+//										TextMetrics {
+//											id: headerSizer
+//											text: modelData.summary
+//											font: "JetBrains Mono"
+//											elide: Text.ElideRight
+//											elideWidth: cardHolder.width - 10
+//										}
+
+										Text { 		
+											text: modelData.summary
+											Layout.preferredWidth: cardHolder.width	
+											height: 5
+											topPadding: 2
+											leftPadding: 8
+											bottomPadding: 8
+											color: white
+											elide: Text.ElideRight
+											font.bold: true	
+											font.family: "JetBrains Mono"
+										}
+				
+										Text {	
+											id: body
+											topPadding: 5
+											leftPadding: 8
+											Layout.preferredWidth: cardHolder.width 
+											text: modelData.body
+											color: white
+											anchors.centerIn: parent
+											elide: Text.ElideRight
+										}
+									}	
+								}
 							}
 						}
 					}
