@@ -16,7 +16,7 @@ ShellRoot {
 	property bool	chargePending: UPower.displayDevice.state == UPowerDeviceState.PendingCharge
 	property bool wasCharging: false
 	property int timeUntilCharged: UPower.displayDevice.timeToFull / 60	
-	property real batLevel: UPower.displayDevice.percentage * 100
+	property int batLevel: UPower.displayDevice.percentage * 100
 
 // Colors
 	property string black: "#282828" 	
@@ -71,14 +71,20 @@ ShellRoot {
 						RowLayout {
 							spacing: 3
 					   	Repeater {
-					      model: 3
+					      model: 5
 					
-					      Text {
+					      Rectangle {
 					        property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
-					        property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
-					        text: ws ? index + 1 : "" 
-					        color: isActive ? blue : (ws ? white : black)
-					        font { pixelSize: 17; bold: true; family: "JetBrains Mono" }
+									property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
+									property string workspaceColor: isActive ? green : (ws ? grey : black)
+									width: 9
+									height: 9
+									color: workspaceColor
+									rotation: 45
+//									border: {color: workspaceColor; width: 1}
+//									text: ws ? index + 1 : "" 
+					        
+//					        font { pixelSize: 17; bold: true; family: "JetBrains Mono" }
 					
 					        MouseArea {
 					          anchors.fill: parent
@@ -176,7 +182,7 @@ ShellRoot {
 	
 				Process {
 					id: chargingNotif
-					command: [ "sh", "-c", "notify-send 'Laptop is now " + (isCharging ? "charging' 'Time until full: '" + (timeUntilCharged==0 ? "unknown" : timeUntilCharged) : "discharging' 'Time until empty: unknown'")]
+					command: [ "sh", "-c", "notify-send 'Laptop is now " + (isCharging ? "charging' 'Time until full: '" + (timeUntilCharged==0 ? "unknown" : timeUntilCharged + " minutes") : "discharging' 'Time until empty: unknown'")]
 					running: false
 				}
 				
@@ -199,11 +205,20 @@ ShellRoot {
 					width: 60
 					height: 20
 					onPressed: {
-						pomodoro = true
-						pomStart.running = true
-						pomWork.running = true
-						clock.text = " "
-					}
+						if (!pomodoro) {							
+							pomodoro = true
+							pomStartNotif.running = true
+							pomWork.running = true
+							clock.text = " "
+						}
+						else {
+							pomodoro = false
+							pomWork.running = false 
+							pomBreak.running = false 
+							clock.color = white 
+							pomAbortNotif.running = true
+						}
+					}	
 					Text {
 						anchors.centerIn: parent	
 						id: clock
@@ -217,6 +232,7 @@ ShellRoot {
 						} 
 					}
 				}
+			}
 			
 					Timer {	
 						interval: 1000
@@ -233,11 +249,12 @@ ShellRoot {
 						onTriggered: {
 							pomBreakNotif.running = true
 							pomBreak.running = true	
+							clock.color = green
 						}
 					}
 	
 					Process {
-						id: pomStart
+						id: pomStartNotif
 						running: false
 						command: ["sh", "-c", "notify-send 'Pomodoro Started' '25 minutes on the clock...'"]
 					}
@@ -253,6 +270,12 @@ ShellRoot {
 						running: false
 						command: ["sh", "-c", "notify-send 'All Done!' 'Press the clock to start again'"]
 					}
+
+					Process {
+						id: pomAbortNotif
+						running: false
+						command: ["sh", "-c", "notify-send 'Pomodoro Aborted' 'No, no, wait--'"]
+					}
 					
 					Timer {
 						id: pomBreak
@@ -262,10 +285,11 @@ ShellRoot {
 						onTriggered: {
 							pomEndNotif.running = true	
 							pomodoro = false
+							clock.color = white
 						}
 					}	
 				}	
-			}
+			
 			
 			Rectangle {
 				id: notifs
@@ -291,8 +315,6 @@ ShellRoot {
 								topRightRadius: 0
 								topLeftRadius: 0
 								radius: 10	
-//								border.color: white
-//								border.width: 2
 								color: black
 			
 								Timer {
@@ -305,21 +327,14 @@ ShellRoot {
 									anchors.fill: notifCard
 									anchors.horizontalCenter: bar
 									onClicked: {
-										modelData.dismiss()
+//										modelData.dismiss()
+									  Qt.platform.clipboard.text = modelData.summary + " | " + modelData.body
 									}
 							
 									ColumnLayout {	
 										implicitHeight: parent.height - 5
 										implicitWidth: cardHolder.width
 										spacing: 10
-
-//										TextMetrics {
-//											id: headerSizer
-//											text: modelData.summary
-//											font: "JetBrains Mono"
-//											elide: Text.ElideRight
-//											elideWidth: cardHolder.width - 10
-//										}
 
 										Text { 		
 											text: modelData.summary
@@ -336,7 +351,7 @@ ShellRoot {
 				
 										Text {	
 											id: body
-											topPadding: 5
+											topPadding: 14
 											leftPadding: 8
 											Layout.preferredWidth: cardHolder.width 
 											text: modelData.body
@@ -353,6 +368,7 @@ ShellRoot {
 			}
 		}
 	}
+	
 
 	PanelWindow {
 		id: pAnchor	
