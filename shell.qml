@@ -7,6 +7,7 @@ import Quickshell.Io
 import QtQuick.Controls
 import Quickshell.Services.Notifications
 import Quickshell.Services.UPower 
+import Quickshell.Networking
 
 ShellRoot {	
 	property int volume
@@ -44,7 +45,7 @@ ShellRoot {
 				anchors.centerIn: parent
 				Rectangle {
 					id: filler
-					implicitWidth: 500
+					implicitWidth: 600
 					implicitHeight: 40
 					color: "transparent" 
 				}
@@ -53,7 +54,7 @@ ShellRoot {
 					id: barContent
 					anchors.horizontalCenter: bar
 					implicitHeight: 40
-					implicitWidth: 200
+					implicitWidth: 240
 					color: black
 					gradient: Gradient {
 	//				orientation: Gradient.Horizontal
@@ -67,7 +68,7 @@ ShellRoot {
 				    anchors.fill: parent
 						anchors.margins: 8
 						spacing: 20
-						
+
 						RowLayout {
 							spacing: 3
 					   	Repeater {
@@ -80,12 +81,7 @@ ShellRoot {
 									width: 9
 									height: 9
 									color: workspaceColor
-									rotation: 45
-//									border: {color: workspaceColor; width: 1}
-//									text: ws ? index + 1 : "" 
-					        
-//					        font { pixelSize: 17; bold: true; family: "JetBrains Mono" }
-					
+									rotation: 45	
 					        MouseArea {
 					          anchors.fill: parent
 					          onClicked: Hyprland.dispatch("workspace " + (index + 1))
@@ -138,16 +134,7 @@ ShellRoot {
 	//						}
 	//					}
 	//				}	
-		
-		//			Process {
-		//				id: wifiConnect
-		//				command: ["sh", "-c", "nmcli d wifi connect " + wifiField.text + " && sleep 15s"]
-		//				running: false
-		//				stdout: StdioCollector {
-		//					onStreamFinished: wifiField.text = this.text
-		//				}
-		//			}
-		
+			
 					MouseArea {
 						id: batArea
 						width: 20
@@ -163,6 +150,7 @@ ShellRoot {
 							batNotif.running = true
 						}
 					}			
+
 	
 				Process {
 					id: batNotif
@@ -201,6 +189,17 @@ ShellRoot {
 					command: ["sh", "-c", "notify-send 'Only at " + batLevel + "%' 'Low battery - Charging recommended'"]
 					running: false
 				}	
+
+				Text {
+					id: wifiText
+					color: green 	
+					width: 12
+					height: 20
+					font.pixelSize: 19
+					text: (Networking.connectivity == NetworkConnectivity.Full) ? "󰤨" : (Networking.connectivity == NetworkConnectivity.Limited) ? "󰤟" : (Networking.connectivity == NetworkConnectivity.None) ? "󰤯" : "?"
+				}
+				
+
 				MouseArea {	
 					width: 60
 					height: 20
@@ -293,7 +292,7 @@ ShellRoot {
 			
 			Rectangle {
 				id: notifs
-				implicitWidth: 450
+				implicitWidth: 500
 				implicitHeight: 40
 				color: "transparent"
 				RowLayout {
