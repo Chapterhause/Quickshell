@@ -30,6 +30,7 @@ ShellRoot {
 	property string wallpaper: "paintForest"	
 	property string app: "firefox"	
 	property bool pomodoro: false
+	property int notifIndex: 1
 	
 		PanelWindow {
 			id: bar
@@ -190,15 +191,33 @@ ShellRoot {
 					running: false
 				}	
 
-				Text {
-					id: wifiText
-					color: green 	
+				MouseArea {
+					Text {
+						id: wifiText
+						color: green 	
+//						width: 12
+//						height: 20
+						font.pixelSize: 19
+						text: (Networking.connectivity == NetworkConnectivity.Full) ? "󰤨" : (Networking.connectivity == NetworkConnectivity.Limited) ? "󰤟" : (Networking.connectivity == NetworkConnectivity.None) ? "󰤯" : "?"
+					}
 					width: 12
-					height: 20
-					font.pixelSize: 19
-					text: (Networking.connectivity == NetworkConnectivity.Full) ? "󰤨" : (Networking.connectivity == NetworkConnectivity.Limited) ? "󰤟" : (Networking.connectivity == NetworkConnectivity.None) ? "󰤯" : "?"
+					height: 25
+					onPressed: {
+						logNotifs.running = true
+					}
 				}
-				
+
+				Process {
+					id: logNotifs
+					running:  false
+					command: ["sh", "-c", "notify-send 'Notifications tracked' '" + server.trackedNotifications.values + "'"]
+				}
+
+//				Process {
+//					id: wifiMenu
+//					running: false
+//					command: ["sh", "-c", "notify-send 'Available Networks' '" + Networking.devices + "'"]
+//				}		
 
 				MouseArea {	
 					width: 60
@@ -295,78 +314,165 @@ ShellRoot {
 				implicitWidth: 500
 				implicitHeight: 40
 				color: "transparent"
+
 				RowLayout {
-					implicitHeight: parent.height
-					spacing: 50
-
-					Repeater {
-						id: cards
-						model: server.trackedNotifications
-						delegate: Item {
-							id: cardHolder
-							width: 250
-							height: 40
-							required property var modelData
-							Rectangle {
-								anchors.fill: parent
-								id: notifCard	
-								anchors.horizontalCenter: parent
-								topRightRadius: 0
-								topLeftRadius: 0
-								radius: 10	
-								color: black
-			
-								Timer {
-									running: true
-									interval: 5000
-									onTriggered: modelData.dismiss()
-								}
-			
-								MouseArea {
-									anchors.fill: notifCard
-									anchors.horizontalCenter: bar
-									onClicked: {
-//										modelData.dismiss()
-									  Qt.platform.clipboard.text = modelData.summary + " | " + modelData.body
-									}
+					spacing: 0	
+					Rectangle {
+						id: notifSwitcher
+						color: black
+						visible: server.trackedNotifications.values == "" ? false : true
+						height: 40
+						width: 15
+						ColumnLayout {
 							
-									ColumnLayout {	
-										implicitHeight: parent.height - 5
-										implicitWidth: cardHolder.width
-										spacing: 10
-
-										Text { 		
-											text: modelData.summary
-											Layout.preferredWidth: cardHolder.width	
-											height: 5
-											topPadding: 2
-											leftPadding: 8
-											bottomPadding: 8
-											color: white
-											elide: Text.ElideRight
-											font.bold: true	
-											font.family: "JetBrains Mono"
-										}
-				
-										Text {	
-											id: body
-											topPadding: 14
-											leftPadding: 8
-											Layout.preferredWidth: cardHolder.width 
-											text: modelData.body
-											color: white
-											anchors.centerIn: parent
-											elide: Text.ElideRight
-										}
-									}	
+							Repeater {
+								model: server.trackedNotifications
+								delegate: Rectangle {
+									anchors.verticalCenter: notifSwitcher
+									width: 9
+									height: 9
+									rotation: 45
+									
+									Timer {
+										running: true
+										interval: 5000
+										onTriggered: { modelData.dismiss(); notifIndex = 1} 
+									}
+									MouseArea {
+										anchors.fill: parent
+										onClicked: notifIndex = index
+									}
 								}
 							}
 						}
 					}
+					Rectangle {	
+						visible: server.trackedNotifications.values == "" ? false : true	
+						height: 40
+						width: 250
+						id: notifCard	
+						anchors.horizontalCenter: parent
+						topRightRadius: 0
+						topLeftRadius: 0
+						radius: 10	
+						color: black
+	
+	
+						MouseArea {
+							anchors.fill: notifCard
+							anchors.horizontalCenter: bar
+//							onClicked: {
+//																				anchors.fill: parent
+//																				onClicked: notifIndex = modelData.indexmodelData.dismiss()
+//							  Qt.platform.clipboard.text = modelData.summary + " | " + modelData.body
+//							}
+					
+							ColumnLayout {	
+								implicitHeight: parent.height - 5
+								implicitWidth: cardHolder.width
+								spacing: 10
+
+								Text { 		
+									text: server.trackedNotifications.values[notifIndex].summary
+									Layout.preferredWidth: cardHolder.width	
+									height: 5
+									topPadding: 2
+									leftPadding: 8
+									bottomPadding: 8
+									color: white
+									elide: Text.ElideRight
+									font.bold: true	
+									font.family: "JetBrains Mono"
+								}
+		
+								Text {	
+									id: body
+									topPadding: 14
+									leftPadding: 8
+									Layout.preferredWidth: cardHolder.width 
+									text: server.trackedNotifications.values[notifIndex].body
+									color: white
+									anchors.centerIn: parent
+									elide: Text.ElideRight
+								}
+							}	
+						}
+					}
 				}
 			}
-		}
-	}
+
+//				RowLayout {
+//					implicitHeight: parent.height
+//					spacing: 50
+//
+//					Repeater {
+//						id: cards
+//						model: server.trackedNotifications
+//						delegate: Item {
+//							id: cardHolder
+//							width: 250
+//							height: 40
+//							required property var modelData
+//							Rectangle {
+//								anchors.fill: parent
+//								id: notifCard	
+//								anchors.horizontalCenter: parent
+//								topRightRadius: 0
+//								topLeftRadius: 0
+//								radius: 10	
+//								color: black
+//			
+//								Timer {
+//									running: true
+//									interval: 5000
+//									onTriggered: modelData.dismiss()
+//								}
+//			
+//								MouseArea {
+//									anchors.fill: notifCard
+//									anchors.horizontalCenter: bar
+//									onClicked: {
+////										modelData.dismiss()
+//									  Qt.platform.clipboard.text = modelData.summary + " | " + modelData.body
+//									}
+//							
+//									ColumnLayout {	
+//										implicitHeight: parent.height - 5
+//										implicitWidth: cardHolder.width
+//										spacing: 10
+//
+//										Text { 		
+//											text: modelData.summary
+//											Layout.preferredWidth: cardHolder.width	
+//											height: 5
+//											topPadding: 2
+//											leftPadding: 8
+//											bottomPadding: 8
+//											color: white
+//											elide: Text.ElideRight
+//											font.bold: true	
+//											font.family: "JetBrains Mono"
+//										}
+//				
+//										Text {	
+//											id: body
+//											topPadding: 14
+//											leftPadding: 8
+//											Layout.preferredWidth: cardHolder.width 
+//											text: modelData.body
+//											color: white
+//											anchors.centerIn: parent
+//											elide: Text.ElideRight
+//										}
+//									}	
+//								}
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
 	
 
 	PanelWindow {
@@ -541,5 +647,6 @@ ShellRoot {
 //				}
 //			}
 }
-	
-	
+}
+
+}
