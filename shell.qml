@@ -30,7 +30,7 @@ ShellRoot {
 	property string wallpaper: "paintForest"	
 	property string app: "firefox"	
 	property bool pomodoro: false
-	property int notifIndex: 1
+	property int notifIndex: 0 //Oldest present notification
 	
 		PanelWindow {
 			id: bar
@@ -38,22 +38,22 @@ ShellRoot {
 			anchors.right: true
 			anchors.left: true
 			implicitHeight: 40	
-			color: "transparent"
+			color: white
 			focusable: true	
-			RowLayout {
-				spacing: 10
-				anchors.fill: parent
-				anchors.centerIn: parent
-				Rectangle {
-					id: filler
-					implicitWidth: 600
-					implicitHeight: 40
-					color: "transparent" 
-				}
+//			RowLayout {
+//				spacing: 10
+//				anchors.fill: parent
+//				anchors.centerIn: parent
+//				Rectangle {
+//					id: filler
+//					implicitWidth: 600
+//					implicitHeight: 40
+//					color: "transparent" 
+//				}
 
 				Rectangle { 
 					id: barContent
-					anchors.horizontalCenter: bar
+					x: 600
 					implicitHeight: 40
 					implicitWidth: 240
 					color: black
@@ -71,6 +71,7 @@ ShellRoot {
 						spacing: 20
 
 						RowLayout {
+							Layout.preferredWidth: 30
 							spacing: 3
 					   	Repeater {
 					      model: 5
@@ -138,7 +139,7 @@ ShellRoot {
 			
 					MouseArea {
 						id: batArea
-						width: 20
+						Layout.preferredWidth: 10
 						height: 25	
 						anchors.verticalCenter: barContent 
 						hoverEnabled: true
@@ -197,30 +198,25 @@ ShellRoot {
 						color: green 	
 //						width: 12
 //						height: 20
+						Layout.fillWidth: true
 						font.pixelSize: 19
 						text: (Networking.connectivity == NetworkConnectivity.Full) ? "󰤨" : (Networking.connectivity == NetworkConnectivity.Limited) ? "󰤟" : (Networking.connectivity == NetworkConnectivity.None) ? "󰤯" : "?"
 					}
-					width: 12
+					Layout.preferredWidth: 20
 					height: 25
 					onPressed: {
-						logNotifs.running = true
+						wifiMenu.running = true
 					}
 				}
-
+				
 				Process {
-					id: logNotifs
-					running:  false
-					command: ["sh", "-c", "notify-send 'Notifications tracked' '" + server.trackedNotifications.values + "'"]
-				}
-
-//				Process {
-//					id: wifiMenu
-//					running: false
-//					command: ["sh", "-c", "notify-send 'Available Networks' '" + Networking.devices + "'"]
-//				}		
+					id: wifiMenu
+					running: false
+					command: ["sh", "-c", "notify-send 'Available Networks' '" + Networking.devices + "'"]
+				}		
 
 				MouseArea {	
-					width: 60
+					Layout.preferredWidth: 60
 					height: 20
 					onPressed: {
 						if (!pomodoro) {							
@@ -241,6 +237,8 @@ ShellRoot {
 						anchors.centerIn: parent	
 						id: clock
 						color: white 
+						Layout.preferredWidth: 100
+						Layout.fillWidth: true
 						font { pixelSize: 16; bold: true; family: "JetBrains Mono" }
 						text: Qt.formatDateTime(new Date(), "HH:mm:ss")
 						ToolTip {
@@ -311,7 +309,9 @@ ShellRoot {
 			
 			Rectangle {
 				id: notifs
-				implicitWidth: 500
+				anchors.left: barContent.right
+				anchors.leftMargin: 100
+				implicitWidth: 600
 				implicitHeight: 40
 				color: "transparent"
 
@@ -320,23 +320,29 @@ ShellRoot {
 					Rectangle {
 						id: notifSwitcher
 						color: black
+						bottomLeftRadius: 10
 						visible: server.trackedNotifications.values == "" ? false : true
 						height: 40
-						width: 15
+						width: 20
 						ColumnLayout {
-							
+//							anchors.fill: parent
+							anchors.left: parent.left
+							anchors.leftMargin: 5		
 							Repeater {
-								model: server.trackedNotifications
-								delegate: Rectangle {
-									anchors.verticalCenter: notifSwitcher
+								model: server.trackedNotifications		
+								Layout.fillWidth: true
+								delegate: Rectangle {	
 									width: 9
 									height: 9
 									rotation: 45
+									color: notifIndex == index ? black : white
+									border.color: white
+									border.width: 1
 									
 									Timer {
 										running: true
 										interval: 5000
-										onTriggered: { modelData.dismiss(); notifIndex = 1} 
+										onTriggered: { notifIndex = 0; modelData.dismiss()} 
 									}
 									MouseArea {
 										anchors.fill: parent
@@ -346,15 +352,17 @@ ShellRoot {
 							}
 						}
 					}
+					
 					Rectangle {	
 						visible: server.trackedNotifications.values == "" ? false : true	
 						height: 40
-						width: 250
+						width: 200
 						id: notifCard	
 						anchors.horizontalCenter: parent
 						topRightRadius: 0
 						topLeftRadius: 0
-						radius: 10	
+						radius: 10
+						bottomLeftRadius: 0
 						color: black
 	
 	
@@ -369,12 +377,12 @@ ShellRoot {
 					
 							ColumnLayout {	
 								implicitHeight: parent.height - 5
-								implicitWidth: cardHolder.width
+								implicitWidth: notifCard.width
 								spacing: 10
 
 								Text { 		
 									text: server.trackedNotifications.values[notifIndex].summary
-									Layout.preferredWidth: cardHolder.width	
+									Layout.preferredWidth: notifCard.width	
 									height: 5
 									topPadding: 2
 									leftPadding: 8
@@ -387,9 +395,9 @@ ShellRoot {
 		
 								Text {	
 									id: body
-									topPadding: 14
+//									topPadding: 14
 									leftPadding: 8
-									Layout.preferredWidth: cardHolder.width 
+									Layout.preferredWidth: notifCard.width 
 									text: server.trackedNotifications.values[notifIndex].body
 									color: white
 									anchors.centerIn: parent
@@ -400,158 +408,84 @@ ShellRoot {
 					}
 				}
 			}
-
-//				RowLayout {
-//					implicitHeight: parent.height
-//					spacing: 50
+	
+//	PanelWindow {
+//		id: pAnchor	
+//		color: "transparent"
+//		anchors.top: true
+//		anchors.right: true			
+//	}
 //
-//					Repeater {
-//						id: cards
-//						model: server.trackedNotifications
-//						delegate: Item {
-//							id: cardHolder
-//							width: 250
-//							height: 40
-//							required property var modelData
-//							Rectangle {
-//								anchors.fill: parent
-//								id: notifCard	
-//								anchors.horizontalCenter: parent
-//								topRightRadius: 0
-//								topLeftRadius: 0
-//								radius: 10	
-//								color: black
-//			
-//								Timer {
-//									running: true
-//									interval: 5000
-//									onTriggered: modelData.dismiss()
-//								}
-//			
-//								MouseArea {
-//									anchors.fill: notifCard
-//									anchors.horizontalCenter: bar
-//									onClicked: {
-////										modelData.dismiss()
-//									  Qt.platform.clipboard.text = modelData.summary + " | " + modelData.body
-//									}
-//							
-//									ColumnLayout {	
-//										implicitHeight: parent.height - 5
-//										implicitWidth: cardHolder.width
-//										spacing: 10
-//
-//										Text { 		
-//											text: modelData.summary
-//											Layout.preferredWidth: cardHolder.width	
-//											height: 5
-//											topPadding: 2
-//											leftPadding: 8
-//											bottomPadding: 8
-//											color: white
-//											elide: Text.ElideRight
-//											font.bold: true	
-//											font.family: "JetBrains Mono"
-//										}
-//				
-//										Text {	
-//											id: body
-//											topPadding: 14
-//											leftPadding: 8
-//											Layout.preferredWidth: cardHolder.width 
-//											text: modelData.body
-//											color: white
-//											anchors.centerIn: parent
-//											elide: Text.ElideRight
-//										}
-//									}	
-//								}
-//							}
+//	PopupWindow {
+//		id: pieMenu		
+//		anchor.window: pAnchor
+//		anchor.gravity: Edges.Top | Edges.Left
+//		implicitWidth: 1400
+//		implicitHeight: 1000 
+//		visible: false
+//		color: "transparent"
+//			Repeater {
+//				id: rep	
+//				model: ["firefox", "nemo", "blender", "obsidian", "rawtherapee", "sioyek"]	
+//    		delegate: Item {
+//					id: element
+//					height: 500
+//					width: 160
+//					y: -50
+//					x: 625
+//        	transformOrigin: Item.Bottom
+//        	rotation: 360 / rep.model.length * index
+//					
+//					MouseArea {
+//						id: pieButton
+//						anchors.fill: parent	
+//						hoverEnabled: true
+//						onEntered: {
+//							app = modelData		
 //						}
+//						
+//						Rectangle {	
+//							color: black
+//							anchors.centerIn: element
+//							y: 400
+//							width: 150
+//							height: 20
+//							radius: 20	
+//							rotation: -element.rotation
+//							
+//							Text {
+//								text: modelData
+//								anchors.centerIn: parent
+//								color: modelData == app ? blue : white
+//								font.pixelSize: 17 	
+//							} 
+//						}
+//						anchors.horizontalCenter: parent.horizontalCenter
 //					}
-//				}
+//    		}
 //			}
+			
+//	}
+
+//	Process {
+//		id: launchApp
+//		command: [ "sh", "-c", app ]
+//		running: false
+//	}
+//
+//	GlobalShortcut {
+//    appid: "quickshell"
+//    name: "pieMenuOn"
+//    onPressed: {	
+//			pieMenu.visible = true	
+//		}	
+//		onReleased: {	
+//			launchApp.running = pieMenu.visible ? true : false
+//			pieMenu.visible = false
 //		}
 //	}
-	
-
-	PanelWindow {
-		id: pAnchor	
-		color: "transparent"
-		anchors.top: true
-		anchors.right: true			
-	}
-
-	PopupWindow {
-		id: pieMenu		
-		anchor.window: pAnchor
-		anchor.gravity: Edges.Top | Edges.Left
-		implicitWidth: 1400
-		implicitHeight: 1000 
-		visible: false
-		color: "transparent"
-			Repeater {
-				id: rep	
-				model: ["firefox", "nemo", "blender", "obsidian", "rawtherapee", "sioyek"]	
-    		delegate: Item {
-					id: element
-					height: 500
-					width: 160
-					y: -50
-					x: 625
-        	transformOrigin: Item.Bottom
-        	rotation: 360 / rep.model.length * index
-					
-					MouseArea {
-						id: pieButton
-						anchors.fill: parent	
-						hoverEnabled: true
-						onEntered: {
-							app = modelData		
-						}
-						
-						Rectangle {	
-							color: black
-							anchors.centerIn: element
-							y: 400
-							width: 150
-							height: 20
-							radius: 20	
-							rotation: -element.rotation
-							
-							Text {
-								text: modelData
-								anchors.centerIn: parent
-								color: modelData == app ? blue : white
-								font.pixelSize: 17 	
-							} 
-						}
-						anchors.horizontalCenter: parent.horizontalCenter
-					}
-    		}
-			}
-			
-	}
-
-	Process {
-		id: launchApp
-		command: [ "sh", "-c", app ]
-		running: false
-	}
-
-	GlobalShortcut {
-    appid: "quickshell"
-    name: "pieMenuOn"
-    onPressed: {	
-			pieMenu.visible = true	
-		}	
-		onReleased: {	
-			launchApp.running = pieMenu.visible ? true : false
-			pieMenu.visible = false
-		}
-	}
-
-//  GlobalShortcut {
+//
+////  GlobalShortcut {
 //    appid: "quickshell"ble
 //    name: "pieMenuOff"
 //    onPressed: {	
@@ -646,7 +580,7 @@ ShellRoot {
 //					}
 //				}
 //			}
-}
+// }
 }
 
 }
